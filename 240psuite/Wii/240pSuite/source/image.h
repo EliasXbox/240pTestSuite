@@ -13,20 +13,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with 240p Test Suite; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
- 
-/*---------------------------------------------------------------------------------
 
-	Image Functions
-
----------------------------------------------------------------------------------*/
 #ifndef IMAGES_H
 #define IMAGES_H
 
+#ifdef WII2XENON
+#include <gccore.h>
+#else
 #include <string.h>
 #include <malloc.h>
 #include <zlib.h>
@@ -35,8 +29,8 @@
 #include "textures_tpl.h"
 #include "textures.h"
 #include "comp_textures.h"
-
 #include "video.h"
+#endif
 
 #ifdef DEBUG_MEM
 void debugstr(char *data);
@@ -45,34 +39,30 @@ void debugstr(char *data);
 typedef struct image_st * ImagePtr;
 
 struct image_st{
-		GXTexObj tex;
-		float   x;
-		float   y;
-		float   layer;    
-		float	u1;
-		float	v1;
-		float	u2;
-		float	v2;
-		float  	w;	
-		float  	h;
-		float  	tw;
-		float  	th; 
-		u8  	r;	
-		u8  	g;   
-		u8  	b;   
-		u8		alpha;
-		u32 	scale;
-		u16 	FH;
-		u16 	FV;
-		u8		IgnoreOffsetY;
+        GXTexObj tex;
+        float   x;
+        float   y;
+        float   layer;
+        float   u1;
+        float   v1;
+        float   u2;
+        float   v2;
+        float   w;
+        float   h;
+        float   tw;
+        float   th;
+        u8      r;
+        u8      g;
+        u8      b;
+        u8      alpha;
+        u32     scale;
+        u16     FH;
+        u16     FV;
+        u8      IgnoreOffsetY;
 
-		u8			*cFB;
-		u8			*memCpyTexture;
+        u8      *cFB;
+        u8      *memCpyTexture;
 };
-
-/***********************/
-/*    Base Functions   */
-/***********************/
 
 u8 InitGX();
 void SetupGX();
@@ -86,12 +76,10 @@ u8 LoadTextures();
 void ReleaseTextures();
 void CloseTextures();
 
+#ifndef WII2XENON
 extern u8 *full_textures_tpl;
 extern uLong full_textures_tpl_size;
-
-/************************/
-/*    Image Functions   */
-/************************/
+#endif
 
 ImagePtr LoadImage(int texture, int maptoscreen);
 ImagePtr LoadImageMemCpy(int Texture, int maptoscreen);
@@ -107,10 +95,6 @@ void IgnoreOffset(ImagePtr image);
 void MapToScreen(ImagePtr image);
 void SetTextureColor(ImagePtr tex, u8 r, u8 g, u8 b);
 
-/************************/
-/*    Scanline Functions   */
-/************************/
-
 extern ImagePtr scanlines;
 
 void LoadScanlines();
@@ -125,6 +109,5 @@ void ToggleScanlineEvenOdd();
 u8 GetRawScanlineValue();
 void SetRawScanlineIntensity(u8 intensity);
 void SetScanlinesEvenOrOdd(u8 Even);
-
 
 #endif
