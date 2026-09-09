@@ -1,12 +1,46 @@
 /*
  * 240p Test Suite - Wii2Xenon visual bootstrap
  *
- * Branch-only adapter for the first image path on Xbox 360.
- * Keeps the public ImagePtr / DrawImage shape used by the Wii code while
- * mapping 320x240-style coordinates into Wii2Xenon's current clip-space GX360.
+ * Branch-only adapter for the first image/scene path on Xbox 360.
+ * Keeps the public ImagePtr / DrawImage / StartScene / EndScene shape used by
+ * the Wii code while mapping the minimum required behavior into GX360.
  */
 
 #include "image.h"
+
+/*
+ * P0.2 scene bootstrap.
+ * The original Wii StartScene configures viewport, vertex descriptors and a
+ * model-view matrix. GX360 currently owns a fixed compatible immediate-mode
+ * pipeline, so those state calls are intentionally absorbed here for now.
+ */
+void StartScene(void)
+{
+    GX_SetViewport(0.0f, 0.0f, 320.0f, 240.0f, 0.0f, 1.0f);
+    GX_InvVtxCache();
+    GX_ClearVtxDesc();
+    GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+}
+
+/*
+ * The original Wii EndScene also handles scanlines, EFB/XFB copying and VIDEO
+ * synchronization. P0.2 maps only render state + presentation; framebuffer
+ * emulation remains a later compatibility slice.
+ */
+void EndScene(void)
+{
+    GX_SetZMode(GX_DISABLE, GX_LEQUAL, GX_FALSE);
+    GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GX_SetAlphaUpdate(GX_TRUE);
+    GX_SetColorUpdate(GX_TRUE);
+    GX_DrawDone();
+    GX360_Present();
+}
 
 void DrawImage(ImagePtr image)
 {
